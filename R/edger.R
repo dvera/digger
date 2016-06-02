@@ -39,6 +39,8 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
     grp <- grp[samples]
   }
 
+  cnts <- cnts[order(rownames(cnts)),]
+
   # make expression tables
   #cpms<-cpm.default(cnts)
   #rpkms<-rpkm.default(cnts,genelengths)
@@ -75,8 +77,8 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
 
     #compstring=compstring[g]
     #dir.create(compstring)
-    s1a<-rowMeans(cnts[,which(colnames(cnts)==eg[g,1]),drop=F])
-    s2a<-rowMeans(cnts[,which(colnames(cnts)==eg[g,2]),drop=F])
+    s1a<-rowMeans(cnts[,which(grouping==eg[g,1]),drop=F])
+    s2a<-rowMeans(cnts[,which(grouping==eg[g,2]),drop=F])
     avg<-data.frame(s1a,s2a)
     colnames(avg)=c(eg[g,1],eg[g,2])
 
@@ -93,7 +95,7 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
     ett=ett[order(row.names(ett)),]
     ett$QValue=p.adjust(ett$PValue,method="fdr")
 
-    ettt=cbind(row.names(ett),avg,ett)
+    ettt=cbind(row.names(ett),cnts,ett)
     colnames(ettt)[1] <- "gene"
 
 

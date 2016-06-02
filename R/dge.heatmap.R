@@ -5,6 +5,7 @@ dge.heatmap <- function ( counts , genelists , suffix="" , savetables=FALSE , so
   cnts=read.tsv(counts,header=TRUE,row.names=1)
   rownames(cnts) <- toupper(rownames(cnts))
   genelengths=cnts[,5]
+  genenames=rownames(cnts)
   names(genelengths)=row.names(cnts)
   cnts=cnts[,-(1:5)]
   cnts=data.matrix(cnts)

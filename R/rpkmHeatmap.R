@@ -42,3 +42,5 @@ rpkmHeatmap <- function(countsTable, genefiles, samplenames , marg=c(10,10), rpk
 	
 	
 }
+ 
+ 

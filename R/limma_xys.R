@@ -91,7 +91,7 @@ limma_xys <- function( xysFiles , outname , contrasts=NULL , grouping=NULL , ann
   if(nrow(pos4)>0){ tsvWrite(pos4,file=pos4name,col_names=T) }
   if(nrow(neg4)>0){ tsvWrite(neg4,file=neg4name,col_names=T) }
 
-
+}
 
 
 

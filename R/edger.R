@@ -95,8 +95,9 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
     ett=ett[order(row.names(ett)),]
     ett$QValue=p.adjust(ett$PValue,method="fdr")
 
-    ettt=cbind(row.names(ett),cnts,ett)
+    ettt=cbind(row.names(ett),genelengths,cnts,ett)
     colnames(ettt)[1] <- "gene"
+    colnames(ettt)[2] <- "length"
 
 
     write.tsv(ettt,file=compstrings[g],colnames=TRUE)

@@ -1,5 +1,4 @@
 edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCounts", dispersion=NULL, threads=getOption("threads",1L)  ){
-
   library(edgeR)
   library(readr)
   # library(biomaRt)
@@ -24,6 +23,9 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
     cnts=read.tsv(counts,header=TRUE,row.names=1)
   } else if ( tabletype=="featureCounts" ){
     cnts=read.tsv(counts,header=TRUE,row.names=1)
+    rownames(cnts)=cnts[,1]
+    colnames(cnts)=cnts[1,]
+    cnts=cnts[-1,-1]
     genelengths=cnts[,5]
     names(genelengths)=row.names(cnts)
     cnts=cnts[,-(1:5)]
@@ -31,6 +33,7 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
   if(is.null(grouping)){
     grp <- colnames(cnts)
   } else{
+    if(length(grouping) != length(cnts) ){stop("all samples in counts table must have grouping")}
     grp <- grouping
   }
   if(!is.null(samples)){
@@ -66,6 +69,7 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
   }
 
   # below assumes no replicates
+  cnts=data.matrix(cnts)
   dge=DGEList(counts=cnts,group=grp)
 
   compstrings<-paste0(eg[,2],"_over_",eg[,1],".edger")
@@ -77,8 +81,8 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
 
     #compstring=compstring[g]
     #dir.create(compstring)
-    s1a<-rowMeans(cnts[,which(grouping==eg[g,1]),drop=F])
-    s2a<-rowMeans(cnts[,which(grouping==eg[g,2]),drop=F])
+    s1a<-rowMeans(cnts[,which(grp==eg[g,1]),drop=F])
+    s2a<-rowMeans(cnts[,which(grp==eg[g,2]),drop=F])
     avg<-data.frame(s1a,s2a)
     colnames(avg)=c(eg[g,1],eg[g,2])
 

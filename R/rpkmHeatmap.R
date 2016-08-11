@@ -1,7 +1,7 @@
 # function to take a feature counts table and a list of genes, make a log counts table (rpkm) and plot a heatmap for those genes
-# depends on conifur and travis library
+# depends on conifur and travis library and gplots
 
-rpkmHeatmap <- function(countsTable, genefiles, samplenames , marg=c(10,10), rpkmout=FALSE, threads=getOption("threads",1L) ) {
+rpkmHeatmap <- function(countsTable, genefiles, samplenames , marg=c(10,10), rpkmout=FALSE, pdfOut=NULL,threads=getOption("threads",1L) ) {
 	library(edgeR)
 
 	cnts=tsvRead(countsTable,col_names=TRUE)		        # read in feature counts table
@@ -37,8 +37,13 @@ rpkmHeatmap <- function(countsTable, genefiles, samplenames , marg=c(10,10), rpk
 
 	w=which( rownames(rpkms) %in% genes )			        # subset rpkm table to just genes from genelist
 	rpkmsSub=rpkms[w,]
-
+	
+	if(!is.null(pdfOut)) {
+		pdf(pdfOut)
+	}
 	heatmap.2(log2(1+rpkmsSub),trace="none",margins=marg)	# make heatMap of log2 rpkms genes subset
-
+	if(!is.null(pdfOut)) {
+		dev.off()
+	}
 
 }

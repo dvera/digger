@@ -1,4 +1,5 @@
 # function to take a feature counts table and a list of genes, make a log counts table (rpkm) and plot a heatmap for those genes
+<<<<<<< HEAD
 # depends on conifur and travis library and gplots
 
 rpkmHeatmap <- function(countsTable, genefiles, samplenames , marg=c(10,10), rpkmout=FALSE, pdfOut=NULL,threads=getOption("threads",1L) ) {
@@ -24,24 +25,25 @@ rpkmHeatmap <- function(countsTable, genefiles, samplenames , marg=c(10,10), rpk
 		tsvWrite(as.data.frame(rpkms),fo,col_names=T,row_names=T)	# print rpkm table
 	}
 
-	e=which(filelines(genefiles)==0)			            # check for empty files
+	e=which(filelines(genefiles)==0)			# check for empty files
 	if(length(e) != 0){
 		cat("Empty files not considered:\n")
 		for( i in 1:length(e) )
 			print(genefiles[e[i]])
 		genefiles=genefiles[-e]				                # remove empty files from list
 	}
-
 	genes=tsvRead(genefiles)				                # read in list of genes to use in map
 	genes=toupper( unique( unlist(genes) ) )	    	    # unlist and remove gene duplicates
 
 	w=which( rownames(rpkms) %in% genes )			        # subset rpkm table to just genes from genelist
 	rpkmsSub=rpkms[w,]
-	
+
 	if(!is.null(pdfOut)) {
 		pdf(pdfOut)
 	}
+
 	heatmap.2(log2(1+rpkmsSub),trace="none",margins=marg)	# make heatMap of log2 rpkms genes subset
+
 	if(!is.null(pdfOut)) {
 		dev.off()
 	}

@@ -19,7 +19,7 @@
 ###       0   (false)
 ###       1   (true)
 
-GOrilla <- function (targetFiles, backgroundFiles=NULL, outputdir=NULL, organism="HOMO_SAPIENS",runMode="mhg",ontology="all",pValue=0.01,name=NULL,email=NULL,includeDups=0,revigo=1,fast=1, scpPath=NULL, threads=getOption("threads",1L) ){
+GOrilla <- function (targetFiles, backgroundFiles=NULL, outputDir=NULL, organism="HOMO_SAPIENS",runMode="mhg",ontology="all",pValue=0.01,name=NULL,email=NULL,includeDups=0,revigo=1,fast=1, scpPath=NULL, threads=getOption("threads",1L) ){
 
   scriptURL="http://www.veralab.org/kkyle/automateGOrilla.pl"
    l=list.files("~",pattern="automateGOrilla.pl",recursive=T)
@@ -31,8 +31,8 @@ GOrilla <- function (targetFiles, backgroundFiles=NULL, outputdir=NULL, organism
    else
      l=paste0("~/",l)
 
-  if(is.null(outputdir))
-    outputdir="."
+  if(is.null(outputDir))
+    outputDir="."
 
   cmdString=paste("perl", l[1], "-targets", targetFiles, "-outputdir", outputDir)
 

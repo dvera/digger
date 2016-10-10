@@ -1,4 +1,4 @@
-edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCounts", dispersion=NULL, rpkmout=F, regOut=F, pva;l=FALSE, threads=getOption("threads",1L)  ){
+edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCounts", dispersion=NULL, rpkmout=F, regOut=F, pval=FALSE, threads=getOption("threads",1L)  ){
   library(edgeR)
   library(readr)
   # library(biomaRt)

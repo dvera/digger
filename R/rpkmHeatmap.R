@@ -1,5 +1,4 @@
 # function to take a feature counts table and a list of genes, make a log counts table (rpkm) and plot a heatmap for those genes
-<<<<<<< HEAD
 # depends on conifur and travis library and gplots
 
 rpkmHeatmap <- function(countsTable, genefiles, samplenames , marg=c(10,10), rpkmout=FALSE, pdfOut=NULL,threads=getOption("threads",1L) ) {

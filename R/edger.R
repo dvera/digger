@@ -1,4 +1,4 @@
-edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCounts", dispersion=NULL, threads=getOption("threads",1L)  ){
+edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCounts", dispersion=NULL, rpkmout=F, regOut=F, pva;l=FALSE, threads=getOption("threads",1L)  ){
   library(edgeR)
   library(readr)
   # library(biomaRt)
@@ -23,9 +23,9 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
     cnts=read.tsv(counts,header=TRUE,row.names=1)
   } else if ( tabletype=="featureCounts" ){
     cnts=read.tsv(counts,header=TRUE,row.names=1)
-    rownames(cnts)=cnts[,1]
-    colnames(cnts)=cnts[1,]
-    cnts=cnts[-1,-1]
+#    rownames(cnts)=cnts[,1]
+#    colnames(cnts)=cnts[1,]
+#    cnts=cnts[-1,-1]
     genelengths=cnts[,5]
     names(genelengths)=row.names(cnts)
     cnts=cnts[,-(1:5)]
@@ -40,6 +40,15 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
     cnts <- cnts[,samples]
     numsamples <- length(samples)
     grp <- grp[samples]
+  }
+  if(rpkmout) {
+    cnts=data.matrix(cnts)
+    rpkms=rpkm.default(cnts,as.numeric(genelengths))			# make rpkm counts table
+    fo=paste0( removeext( basename(counts) ), "_rpkm.tsv")
+    cat(paste0("rpkm table: ",fo,"\n"))
+    t=cbind(rownames(rpkms),rpkms)
+    colnames(t)[1]="gene"
+    tsvWrite(as.data.frame(t),fo,col_names=T)	# print rpkm table
   }
 
   cnts <- cnts[order(rownames(cnts)),]
@@ -72,7 +81,12 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
   cnts=data.matrix(cnts)
   dge=DGEList(counts=cnts,group=grp)
 
-  compstrings<-paste0(eg[,2],"_over_",eg[,1],".edger")
+  if(replicated) {
+    compstrings<-paste0(eg[,2],"_over_",eg[,1],".edger")
+  }
+  else {
+    compstrings<-paste0(eg[,2],"_over_",eg[,1],"_disp",dispersion,".edger")
+  }
 
   print(compstrings)
 
@@ -106,6 +120,28 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
 
     write.tsv(ettt,file=compstrings[g],colnames=TRUE)
   },mc.cores=threads, mc.preschedule=F)
+
+  if(regOut) {
+    dump<-mclapply(1:length(compstrings), function(g) {
+    x=tsvRead(compstrings[g],col_names=T)
+    if(pval) {
+      upreg=which(x$PValue<=0.05 & x$logFC>0)
+      downreg=which(x$PValue<=0.05 & x$logFC<0)
+      s="_Pval_"
+    }
+    else {
+      upreg=which(x$QValue<=0.05 & x$logFC>0)
+      downreg=which(x$QValue<=0.05 & x$logFC<0)
+      s="_Qval_"
+    }
+    xup=x[upreg,]
+    xdown=x[downreg,]
+    tsvWrite(xup,file=paste0(remove.suffix(compstrings[g],".edger"),s,"upreg.txt"))
+    tsvWrite(xdown,file=paste0(remove.suffix(compstrings[g],".edger"),s,"downreg.txt"))
+    tsvWrite(as.data.frame(xup$gene),file=paste0(remove.suffix(compstrings[g],".edger"),s,"upreg_genes.txt"))
+    tsvWrite(as.data.frame(xdown$gene),file=paste0(remove.suffix(compstrings[g],".edger"),s,"downreg_genes.txt"))
+    },mc.cores=threads, mc.preschedule=F)
+  }
 
   return(paste0(compstrings))
 

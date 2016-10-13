@@ -136,8 +136,8 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
     }
     xup=x[upreg,]
     xdown=x[downreg,]
-    tsvWrite(xup,file=paste0(remove.suffix(compstrings[g],".edger"),s,"upreg.txt"))
-    tsvWrite(xdown,file=paste0(remove.suffix(compstrings[g],".edger"),s,"downreg.txt"))
+    tsvWrite(xup,file=paste0(remove.suffix(compstrings[g],".edger"),s,"upreg.txt"),col_names=T)
+    tsvWrite(xdown,file=paste0(remove.suffix(compstrings[g],".edger"),s,"downreg.txt"),col_names=T)
     tsvWrite(as.data.frame(xup$gene),file=paste0(remove.suffix(compstrings[g],".edger"),s,"upreg_genes.txt"))
     tsvWrite(as.data.frame(xdown$gene),file=paste0(remove.suffix(compstrings[g],".edger"),s,"downreg_genes.txt"))
     },mc.cores=threads, mc.preschedule=F)

@@ -11,7 +11,7 @@ rpkmHeatmap <- function(countsTable, genefiles, samplenames , marg=c(10,10), rpk
 	else
 		stopifnot(length(samplenames)==numsamples)	        # exit if samplenames vector not the correct length
 	colnames(cnts)[7:ncol(cnts)] <- samplenames		        # set column names of table
-
+	cnts=as.data.frame(cnts)
 	rownames(cnts)=toupper(cnts[,1])			            # make all genes uppercase for searching
 	genelengths=cnts[,6]				        	        # extract gene lengths from table for rpkm calc
 	names(genelengths)=row.names(cnts)

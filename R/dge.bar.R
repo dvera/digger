@@ -3,8 +3,9 @@
 ### 1 = dark and light color bars (Qval <= 0.1)
 ### 2 = only light color bars (most significant, Qval <= 0.05)
 # dges = edger or cuffdiff (cuffdiff=T) files
+# forceInclude = vector of genes to always include in barplot, even if dont fit significantOnly cutoff
 
-dge.bar <- function( dges , genelists=NULL , listnames=NULL , sortByChange=TRUE , debug=getOption("verbose"), cuffdiff=FALSE, significantOnly=0, savetables=FALSE, logTwo=TRUE ){
+dge.bar <- function( dges , genelists=NULL , listnames=NULL , sortByChange=TRUE , debug=getOption("verbose"), cuffdiff=FALSE, significantOnly=0, forceInclude=NULL, forceDontInclude=NULL, savetables=FALSE, logTwo=TRUE ){
 
   #library(edgeR)
   #library(DESeq2)
@@ -30,17 +31,20 @@ dge.bar <- function( dges , genelists=NULL , listnames=NULL , sortByChange=TRUE 
   numdes <- length(dges)
 
   if(is.null(listnames)){
-    listnames = basename((genelists))
+    listnames = removeext(basename((genelists)))
   }
 
 
   for(d in seq_len(numdes)){
     if(logTwo) {
-      ext="_log2bar.pdf"
+      ext="_log2FC"
     } else {
-      ext="_bar.pdf"
+      ext="_FC"
     }
-    pdf(file=paste0(basename(removeext(dges[d])),"_sig",significantOnly,ext))
+    if( !is.null(forceDontInclude) ) { ext=paste0("_minusSome",ext) }
+    if( !is.null(forceInclude) ) { ext=paste0("_plusSome",ext) }
+
+    pdf(file=paste0(basename(removeext(dges[d])),"_sig",significantOnly,ext,"_barPlot.pdf"))
     de <- read.tsv(dges[d],header=T)
 
     if(cuffdiff){
@@ -82,8 +86,18 @@ dge.bar <- function( dges , genelists=NULL , listnames=NULL , sortByChange=TRUE 
         }
 
       })
+
       generows <- lapply(1:numlists, function(x){
-        which(toupper(de$gene) %in% toupper(gsub(" ","",gsub("Α","A",genes[[x]]))))
+        w1=which(toupper(de$gene) %in% toupper(gsub(" ","",gsub("Α","A",genes[[x]]))))
+        if( !is.null(forceInclude) ) {
+          w2=which(toupper(de$gene) %in% toupper(gsub(" ","",gsub("Α","A",forceInclude))))
+          w1=sort(unique(c(w1,w2)))
+        }
+        if( !is.null(forceDontInclude) ) {
+          w2=which(toupper(de$gene) %in% toupper(gsub(" ","",gsub("Α","A",forceDontInclude))))
+          w1=w1[-which(w1 %in% w2)]
+        }
+        return(w1)
       })
     }
 
@@ -103,20 +117,27 @@ dge.bar <- function( dges , genelists=NULL , listnames=NULL , sortByChange=TRUE 
 
       if(sortByChange){subde<-subde[order(subde$logFC, decreasing=T),]}
       if(significantOnly > 0) {
-        w=which(subde$color=="black")
+        w=which(subde$color=="black" & toupper(subde$gene) %ni% forceInclude)
         if(length(w) != 0)
           subde<-subde[-w,]
         if(significantOnly == 2) {
-          w=which(subde$color=="darkgreen")
+          w=which(subde$color=="darkgreen" & toupper(subde$gene) %ni% forceInclude)
           if(length(w) != 0)
             subde<-subde[-w,]
-          w=which(subde$color=="darkred")
+          w=which(subde$color=="darkred" & toupper(subde$gene) %ni% forceInclude)
           if(length(w) != 0)
             subde<-subde[-w,]
         }
+        if(!logTwo){
+          subde$FC=2^subde$logFC
+          w=which(subde$FC < 1)
+          subde$FC[w]=-subde$FC[w]^(-1)
+        }
       }
 
-      if(savetables){ write.tsv(subde, file=paste0(basename(removeext(dges[d])),"_sig",significantOnly,"_",removeext(listnames[i]),".edger"), colnames=T )}   # eh....
+      if(savetables){
+        write.tsv(subde, file=paste0(basename(removeext(dges[d])),"_sig",significantOnly,"_",listnames[i],".edger"), colnames=T )
+      }
 
 
       if(nrow(subde)>0){
@@ -137,7 +158,7 @@ dge.bar <- function( dges , genelists=NULL , listnames=NULL , sortByChange=TRUE 
           #par(mar=c(2,2,2,1), xpd=FALSE)
         } else {
           barplot(
-            2^subde$logFC,
+            subde$FC,
             #log1cnts[,which(colnames(cnts)==eg[g,2])],
             main=removeext(listnames[i]),
             col=subde$color,

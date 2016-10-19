@@ -2,6 +2,7 @@
 ### 0 = false
 ### 1 = dark and light color bars (Qval <= 0.1)
 ### 2 = only light color bars (most significant, Qval <= 0.05)
+# dges = edger or cuffdiff (cuffdiff=T) files
 
 dge.bar <- function( dges , genelists=NULL , listnames=NULL , sortByChange=TRUE , debug=getOption("verbose"), cuffdiff=FALSE, significantOnly=0, savetables=FALSE, logTwo=TRUE ){
 

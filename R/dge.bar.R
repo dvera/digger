@@ -116,7 +116,7 @@ dge.bar <- function( dges , genelists=NULL , listnames=NULL , sortByChange=TRUE 
         }
       }
 
-      if(savetables){ write.tsv(subde, file=paste0(basename(removeext(dges[d])),"_",removeext(listnames[i]),".edger"), colnames=T )}   # eh....
+      if(savetables){ write.tsv(subde, file=paste0(basename(removeext(dges[d])),"_sig",significantOnly,"_",removeext(listnames[i]),".edger"), colnames=T )}   # eh....
 
 
       if(nrow(subde)>0){

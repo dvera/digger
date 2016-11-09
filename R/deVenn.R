@@ -33,15 +33,17 @@ deVenn <- function(upfiles,downfiles=NULL,pdfName=NULL, outValues=T,valStrings=l
   dev.off()
 
   # writing intersection lists to files
+  if( length(valStrings) != length(uupp$..values..) )
+    valStrings=uupp$..set..
   upvals=paste0("up_",valStrings,".tsv")
   if( outValues && !is.null(downfiles) ) {
     dwnvals=paste0("down_",valStrings,".tsv")
-    invisible( mclapply(1:length(upvals),function(i) {
+    invisible( mclapply(1:length(uupp$..values..),function(i) {
       tsvWrite(as.data.frame(uupp$..values..[i]),upvals[i])
       tsvWrite(as.data.frame(udownp$..values..[i]),dwnvals[i])
     },mc.cores=threads,mc.preschedule=F) )
   }
-  else {
+  else if(outValues){
     invisible( mclapply(1:length(upvals),function(i) {
       tsvWrite(as.data.frame(uupp$..values..[i]),upvals[i])
     },mc.cores=threads,mc.preschedule=F) )

@@ -14,15 +14,15 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
 
 
   if(tabletype=="cuffdiff"){
-    rawcnts=read.tsv(counts,header=T)
+    rawcnts=read.table(counts,header=T,stringsAsFactors=F)
     numsamples=(ncol(rawcnts)-1)/5
     cnts=rawcnts[,(2+(0:(numsamples-1))*5)]
     row.names(cnts)<-rawcnts[,1]
     rm(rawcnts)
   } else if ( tabletype=="counts" ){
-    cnts=read.tsv(counts,header=TRUE,row.names=1)
+    cnts=read.table(counts,header=TRUE,row.names=1,stringsAsFactors=F)
   } else if ( tabletype=="featureCounts" ){
-    cnts=read.tsv(counts,header=TRUE,row.names=1)
+    cnts=read.table(counts,header=TRUE,row.names=1,stringsAsFactors=F)
 #    rownames(cnts)=cnts[,1]
 #    colnames(cnts)=cnts[1,]
 #    cnts=cnts[-1,-1]

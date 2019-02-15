@@ -1,4 +1,4 @@
-edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCounts", dispersion=NULL, rpkmout=F, regOut=F, pval=FALSE, threads=getOption("threads",1L)  ){
+edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCounts", cpmThreshold=0.1, minSamplesAboveCpmThreshold=3, dispersion=NULL, rpkmout=F, regOut=F, pval=FALSE, threads=getOption("threads",1L)  ){
   library(edgeR)
   library(readr)
   # library(biomaRt)
@@ -23,12 +23,14 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
     cnts=read.table(counts,header=TRUE,row.names=1,stringsAsFactors=F)
   } else if ( tabletype=="featureCounts" ){
     cnts=read.table(counts,header=TRUE,row.names=1,stringsAsFactors=F)
-#    rownames(cnts)=cnts[,1]
-#    colnames(cnts)=cnts[1,]
-#    cnts=cnts[-1,-1]
     genelengths=cnts[,5]
     names(genelengths)=row.names(cnts)
     cnts=cnts[,-(1:5)]
+    cpms=cpm.default(cnts)
+    good=which(rowSums(cpms>=cpmThreshold)>=minSamplesAboveCpmThreshold)
+    cnts=cnts[good,]
+    genelengths=genelengths[good]
+ 
   }
   if(is.null(grouping)){
     grp <- colnames(cnts)
@@ -50,8 +52,8 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
     colnames(t)[1]="gene"
     tsvWrite(as.data.frame(t),fo,col_names=T)	# print rpkm table
   }
-
-  cnts <- cnts[order(rownames(cnts)),]
+  
+  #cnts <- cnts[order(rownames(cnts)),]
 
   # make expression tables
   #cpms<-cpm.default(cnts)
@@ -68,7 +70,6 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
   eg=eg[-which(eg[,1]==eg[,2]),]
   row.names(eg)<-1:nrow(eg)
 
-
   if(length(unique(grp))==length(grp)){
     replicated=FALSE
     cat("no replicates found\n")
@@ -83,8 +84,7 @@ edger <- function( counts , grouping=NULL , samples=NULL , tabletype="featureCou
 
   if(replicated) {
     compstrings<-paste0(eg[,2],"_over_",eg[,1],".edger")
-  }
-  else {
+  }else {
     compstrings<-paste0(eg[,2],"_over_",eg[,1],"_disp",dispersion,".edger")
   }
 
